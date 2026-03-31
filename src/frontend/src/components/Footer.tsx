@@ -1,5 +1,4 @@
 export default function Footer() {
-  const year = new Date().getFullYear();
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "";
 
@@ -28,7 +27,6 @@ export default function Footer() {
               <a
                 key={link.href}
                 href={link.href}
-                data-ocid={`footer.${link.label.toLowerCase()}.link`}
                 className="text-xs uppercase tracking-[0.15em] text-foreground/40 hover:text-gold transition-colors"
               >
                 {link.label}
@@ -38,8 +36,12 @@ export default function Footer() {
 
           <div className="section-divider max-w-xs mx-auto" />
 
-          <p className="text-xs text-foreground/30 font-sans">
-            © {year} Lincoln Mingo · Class of 2026
+          <p className="text-sm text-foreground/60 font-sans font-medium">
+            The Mingo McFerren Family Presents
+          </p>
+
+          <p className="text-xs text-foreground/40 font-sans">
+            &copy; 2026 Lincoln Mingo &bull; Class of 2026 🎉
           </p>
 
           <p className="text-xs text-foreground/25 font-sans">

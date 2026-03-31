@@ -1,5 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Footer from "./components/Footer";
 import GiftRegistry from "./components/GiftRegistry";
 import GraduationSlideshow from "./components/GraduationSlideshow";
@@ -13,18 +13,11 @@ import WhyMatters from "./components/WhyMatters";
 import { fireConfetti } from "./hooks/useConfetti";
 
 export default function App() {
-  const fired = useRef(false);
-
   useEffect(() => {
-    const handleFirstClick = () => {
-      if (fired.current) return;
-      fired.current = true;
+    const timer = setTimeout(() => {
       fireConfetti();
-      document.removeEventListener("click", handleFirstClick);
-    };
-
-    document.addEventListener("click", handleFirstClick);
-    return () => document.removeEventListener("click", handleFirstClick);
+    }, 300);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -38,7 +31,6 @@ export default function App() {
         }}
       />
       <Header />
-      {/* pt accounts for fixed header (56px nav + 32px event strip) */}
       <main className="pt-[88px] sm:pt-[96px]">
         <GraduationSlideshow />
         <Hero />
