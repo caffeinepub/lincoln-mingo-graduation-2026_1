@@ -5,26 +5,26 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useSubmitRSVP } from "../hooks/useQueries";
+import { useSubmitRSVPWithEmail } from "../hooks/useQueries";
 
 function RSVPForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [attending, setAttending] = useState(true);
   const [success, setSuccess] = useState(false);
-  const submitRSVP = useSubmitRSVP();
+  const submitRSVP = useSubmitRSVPWithEmail();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !email.trim()) return;
     try {
       await submitRSVP.mutateAsync({
         name: name.trim(),
+        email: email.trim(),
         attending,
-        inviteCode: email.trim(),
       });
       setSuccess(true);
-      toast.success("RSVP submitted! See you there.");
+      toast.success("RSVP confirmed! See you there.");
     } catch {
       toast.error("Failed to submit RSVP. Please try again.");
     }
@@ -40,6 +40,9 @@ function RSVPForm() {
         <h3 className="font-serif text-xl text-gold">You're on the list!</h3>
         <p className="text-sm text-foreground/60 font-sans">
           We can't wait to celebrate with you, {name}.
+        </p>
+        <p className="text-xs text-foreground/40 font-sans">
+          A confirmation has been recorded for {email}.
         </p>
       </div>
     );
@@ -77,10 +80,10 @@ function RSVPForm() {
       </div>
 
       <div>
-        <Label className="text-xs uppercase tracking-[0.15em] text-gold/70 font-sans mb-3 block">
+        <Label className="text-xs uppercase tracking-[0.15em] text-gold/70 font-sans mb-3 block text-center">
           Will you attend?
         </Label>
-        <div className="flex gap-3">
+        <div className="flex gap-3 justify-center">
           {([true, false] as const).map((val) => (
             <button
               key={String(val)}

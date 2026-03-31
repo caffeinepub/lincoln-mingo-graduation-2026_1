@@ -9,7 +9,7 @@ const allPhotos = [...photos, ...photos, ...photos, ...photos].map(
 
 export default function GraduationSlideshow() {
   return (
-    <section className="bg-navy overflow-hidden py-6">
+    <section className="bg-navy overflow-hidden pt-16 pb-0">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }

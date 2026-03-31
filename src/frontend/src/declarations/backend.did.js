@@ -42,6 +42,12 @@ export const RSVP = IDL.Record({
   'timestamp' : Time,
   'attending' : IDL.Bool,
 });
+export const RSVPEntry = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Text,
+  'attending' : IDL.Bool,
+  'timestamp' : Time,
+});
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const InviteCode = IDL.Record({
   'created' : Time,
@@ -88,6 +94,7 @@ export const idlService = IDL.Service({
     ),
   'getAllMemories' : IDL.Func([], [IDL.Vec(MemoryMetadata)], ['query']),
   'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
+  'getAllRSVPEntries' : IDL.Func([], [IDL.Vec(RSVPEntry)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
@@ -99,6 +106,7 @@ export const idlService = IDL.Service({
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
+  'submitRSVPWithEmail' : IDL.Func([IDL.Text, IDL.Text, IDL.Bool], [], []),
   'updatePhoto' : IDL.Func([], [], []),
 });
 
@@ -138,6 +146,12 @@ export const idlFactory = ({ IDL }) => {
     'inviteCode' : IDL.Text,
     'timestamp' : Time,
     'attending' : IDL.Bool,
+  });
+  const RSVPEntry = IDL.Record({
+    'name' : IDL.Text,
+    'email' : IDL.Text,
+    'attending' : IDL.Bool,
+    'timestamp' : Time,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const InviteCode = IDL.Record({
@@ -185,6 +199,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getAllMemories' : IDL.Func([], [IDL.Vec(MemoryMetadata)], ['query']),
     'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
+    'getAllRSVPEntries' : IDL.Func([], [IDL.Vec(RSVPEntry)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
@@ -196,6 +211,7 @@ export const idlFactory = ({ IDL }) => {
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
+    'submitRSVPWithEmail' : IDL.Func([IDL.Text, IDL.Text, IDL.Bool], [], []),
     'updatePhoto' : IDL.Func([], [], []),
   });
 };

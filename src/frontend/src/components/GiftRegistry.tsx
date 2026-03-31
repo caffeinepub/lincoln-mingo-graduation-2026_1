@@ -1,9 +1,9 @@
 import { motion } from "motion/react";
 
 const giftMethods = [
-  { label: "Cash App", value: "$YourHandle", emoji: "💚" },
-  { label: "Zelle", value: "[Your Email or Phone]", emoji: "💜" },
-  { label: "Apple Pay", value: "[Your Phone]", emoji: "🍎" },
+  { label: "Cash App", value: "$linc0611", emoji: "💚" },
+  { label: "Zelle", value: "1-469-434-7628", emoji: "💜" },
+  { label: "Venmo", value: "@linc0611", emoji: "🔵" },
 ];
 
 export default function GiftRegistry() {

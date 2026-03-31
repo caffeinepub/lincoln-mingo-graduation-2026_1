@@ -48,6 +48,24 @@ export function useSubmitRSVP() {
   });
 }
 
+export function useSubmitRSVPWithEmail() {
+  const { actor } = useActor();
+  return useMutation({
+    mutationFn: async ({
+      name,
+      email,
+      attending,
+    }: {
+      name: string;
+      email: string;
+      attending: boolean;
+    }) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.submitRSVPWithEmail(name, email, attending);
+    },
+  });
+}
+
 export function useMemories() {
   const { actor, isFetching } = useActor();
   return useQuery({

@@ -125,6 +125,12 @@ export interface RSVP {
     timestamp: Time;
     attending: boolean;
 }
+export interface RSVPEntry {
+    name: string;
+    email: string;
+    attending: boolean;
+    timestamp: Time;
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -145,6 +151,7 @@ export interface backendInterface {
     getAllGuestBookMessages(): Promise<Array<GuestBookMessage>>;
     getAllMemories(): Promise<Array<MemoryMetadata>>;
     getAllRSVPs(): Promise<Array<RSVP>>;
+    getAllRSVPEntries(): Promise<Array<RSVPEntry>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getInviteCodes(): Promise<Array<InviteCode>>;
@@ -152,6 +159,7 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
+    submitRSVPWithEmail(name: string, email: string, attending: boolean): Promise<void>;
     updatePhoto(): Promise<void>;
 }
 import type { ExternalBlob as _ExternalBlob, MemoryMetadata as _MemoryMetadata, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
@@ -353,6 +361,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getAllRSVPEntries(): Promise<Array<RSVPEntry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllRSVPEntries();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllRSVPEntries();
+            return result;
+        }
+    }
     async getCallerUserProfile(): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -448,6 +470,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.submitRSVP(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async submitRSVPWithEmail(arg0: string, arg1: string, arg2: boolean): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.submitRSVPWithEmail(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.submitRSVPWithEmail(arg0, arg1, arg2);
             return result;
         }
     }

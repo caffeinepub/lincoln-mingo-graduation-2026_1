@@ -30,7 +30,6 @@ export default function VideoSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.15 }}
         >
-          {/* Video Embed Placeholder */}
           <div
             className="relative w-full rounded-2xl gold-border card-glow overflow-hidden"
             style={{ aspectRatio: "16/9", background: "oklch(11% 0.010 252)" }}
@@ -64,12 +63,6 @@ export default function VideoSection() {
               </div>
             </div>
           </div>
-
-          <p className="mt-6 text-center text-sm text-foreground/50 font-sans max-w-xl mx-auto leading-relaxed">
-            Keep it simple and real — 20–30 seconds, direct eye contact, genuine
-            gratitude. One strong message creates an emotional connection that
-            lasts far beyond this day.
-          </p>
         </motion.div>
       </div>
     </section>

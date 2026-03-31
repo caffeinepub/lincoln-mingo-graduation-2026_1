@@ -21,8 +21,8 @@ export default function App() {
         }}
       />
       <Header />
-      <GraduationSlideshow />
       <main>
+        <GraduationSlideshow />
         <Hero />
         <WhyMatters />
         <VideoSection />

@@ -87,6 +87,35 @@ actor {
     InviteLinksModule.getInviteCodes(inviteState);
   };
 
+  // === Email-based RSVP (no invite code required) ===
+  public type RSVPEntry = {
+    name : Text;
+    email : Text;
+    attending : Bool;
+    timestamp : Time.Time;
+  };
+
+  var rsvpEntries = List.empty<RSVPEntry>();
+
+  // Submit RSVP with email - public, no auth required
+  public shared func submitRSVPWithEmail(name : Text, email : Text, attending : Bool) : async () {
+    let entry : RSVPEntry = {
+      name = name;
+      email = email;
+      attending = attending;
+      timestamp = Time.now();
+    };
+    rsvpEntries.add(entry);
+  };
+
+  // Get all email RSVPs - Admin only
+  public query ({ caller }) func getAllRSVPEntries() : async [RSVPEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view RSVPs");
+    };
+    rsvpEntries.toArray();
+  };
+
   // Photo Gallery - Memories & Moments
   type MemoryMetadata = {
     title : Text;

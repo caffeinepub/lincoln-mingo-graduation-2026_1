@@ -2,10 +2,7 @@ import { motion } from "motion/react";
 
 export default function Hero() {
   return (
-    <section
-      id="event"
-      className="relative min-h-screen flex items-center pt-16 bg-navy"
-    >
+    <section id="event" className="relative flex items-center bg-navy">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -24,7 +21,7 @@ export default function Hero() {
           >
             <div>
               <p
-                className="font-script text-5xl sm:text-6xl text-gold mb-2"
+                className="font-script text-5xl sm:text-6xl text-gold mb-2 text-center"
                 style={{ lineHeight: 1.2 }}
               >
                 Graduation
@@ -64,7 +61,7 @@ export default function Hero() {
             >
               <img
                 src="/assets/img_0964-019d44d7-8ed5-73ff-b0c7-3b524fadcb31.jpeg"
-                alt="Lincoln Mingo — Graduate 2026"
+                alt="Lincoln Mingo -- Graduate 2026"
                 className="w-full h-full object-cover object-top"
               />
               <div

@@ -39,6 +39,12 @@ export interface RSVP {
     timestamp: Time;
     attending: boolean;
 }
+export interface RSVPEntry {
+    name: string;
+    email: string;
+    attending: boolean;
+    timestamp: Time;
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
@@ -52,6 +58,7 @@ export interface backendInterface {
     getAllGuestBookMessages(): Promise<Array<GuestBookMessage>>;
     getAllMemories(): Promise<Array<MemoryMetadata>>;
     getAllRSVPs(): Promise<Array<RSVP>>;
+    getAllRSVPEntries(): Promise<Array<RSVPEntry>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getInviteCodes(): Promise<Array<InviteCode>>;
@@ -59,5 +66,6 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
+    submitRSVPWithEmail(name: string, email: string, attending: boolean): Promise<void>;
     updatePhoto(): Promise<void>;
 }

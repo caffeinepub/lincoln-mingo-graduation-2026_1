@@ -32,6 +32,12 @@ export interface RSVP {
   'timestamp' : Time,
   'attending' : boolean,
 }
+export interface RSVPEntry {
+  'name' : string,
+  'email' : string,
+  'attending' : boolean,
+  'timestamp' : Time,
+}
 export type Time = bigint;
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
@@ -72,6 +78,7 @@ export interface _SERVICE {
   'getAllGuestBookMessages' : ActorMethod<[], Array<GuestBookMessage>>,
   'getAllMemories' : ActorMethod<[], Array<MemoryMetadata>>,
   'getAllRSVPs' : ActorMethod<[], Array<RSVP>>,
+  'getAllRSVPEntries' : ActorMethod<[], Array<RSVPEntry>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getInviteCodes' : ActorMethod<[], Array<InviteCode>>,
@@ -79,6 +86,7 @@ export interface _SERVICE {
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
+  'submitRSVPWithEmail' : ActorMethod<[string, string, boolean], undefined>,
   'updatePhoto' : ActorMethod<[], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
