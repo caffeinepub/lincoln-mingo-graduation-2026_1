@@ -32,7 +32,8 @@ export default function Header() {
       style={{ borderBottom: "1px solid oklch(63% 0.10 72 / 0.4)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        {/* Main nav row */}
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
             <span
@@ -60,7 +61,7 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* CTA */}
+          {/* CTA + Mobile Toggle */}
           <div className="flex items-center gap-3">
             <a
               href="#rsvp"
@@ -69,12 +70,13 @@ export default function Header() {
             >
               Celebrate Lincoln
             </a>
-            {/* Mobile menu toggle */}
+            {/* Mobile menu toggle — min 44px tap target */}
             <button
               type="button"
-              className="lg:hidden p-2 text-gold"
+              className="lg:hidden flex items-center justify-center w-11 h-11 text-gold"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
+              data-ocid="header.mobile_menu_button"
             >
               <div className="space-y-1.5">
                 <span
@@ -91,6 +93,24 @@ export default function Header() {
           </div>
         </div>
 
+        {/* Event time strip */}
+        <div
+          className="flex items-center justify-center gap-2 py-1.5 border-t"
+          style={{ borderColor: "oklch(63% 0.10 72 / 0.2)" }}
+        >
+          <span className="text-gold text-xs font-sans font-semibold tracking-[0.2em] uppercase whitespace-nowrap">
+            May 28, 2026
+          </span>
+          <span className="text-gold/40 text-xs">|</span>
+          <span className="text-gold text-xs font-sans font-semibold tracking-[0.2em] uppercase whitespace-nowrap">
+            4:00 PM
+          </span>
+          <span className="hidden sm:inline text-gold/40 text-xs">|</span>
+          <span className="hidden sm:inline text-gold/60 text-xs font-sans tracking-[0.1em] whitespace-nowrap">
+            Dr. Jim Vaszauskas Center, Mansfield TX
+          </span>
+        </div>
+
         {/* Mobile Menu */}
         {menuOpen && (
           <motion.div
@@ -99,13 +119,13 @@ export default function Header() {
             exit={{ opacity: 0, height: 0 }}
             className="lg:hidden pb-4"
           >
-            <nav className="flex flex-col gap-3">
+            <nav className="flex flex-col">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-xs uppercase tracking-[0.18em] text-foreground/70 hover:text-gold transition-colors py-1"
+                  className="flex items-center min-h-[44px] text-xs uppercase tracking-[0.18em] text-foreground/70 hover:text-gold transition-colors px-1"
                 >
                   {link.label}
                 </a>
@@ -118,7 +138,7 @@ export default function Header() {
                     .getElementById("rsvp")
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="inline-flex items-center justify-center px-5 py-2 rounded-full btn-gold-outline text-xs uppercase tracking-[0.15em] font-semibold mt-2"
+                className="inline-flex items-center justify-center min-h-[44px] px-5 py-2 rounded-full btn-gold-outline text-xs uppercase tracking-[0.15em] font-semibold mt-2"
               >
                 Celebrate Lincoln
               </button>

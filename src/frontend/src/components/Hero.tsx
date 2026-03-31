@@ -40,13 +40,15 @@ export default function Hero() {
               he's meant to be—Lincoln Mingo is stepping into his next level.
             </p>
 
-            <a
-              href="#rsvp"
-              data-ocid="hero.rsvp_button"
-              className="inline-flex items-center px-8 py-3 rounded-full btn-gold-outline uppercase text-xs tracking-[0.2em] font-semibold"
-            >
-              RSVP Now
-            </a>
+            <div className="flex justify-center">
+              <a
+                href="#rsvp"
+                data-ocid="hero.rsvp_button"
+                className="inline-flex items-center px-8 py-3 rounded-full btn-gold-outline uppercase text-xs tracking-[0.2em] font-semibold"
+              >
+                RSVP Now
+              </a>
+            </div>
           </motion.div>
 
           <motion.div

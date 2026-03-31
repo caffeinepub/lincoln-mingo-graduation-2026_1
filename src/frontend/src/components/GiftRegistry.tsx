@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 const giftMethods = [
   { label: "Cash App", value: "$linc0611", emoji: "💚" },
   { label: "Zelle", value: "1-469-434-7628", emoji: "💜" },
-  { label: "Venmo", value: "@linc0611", emoji: "🔵" },
+  { label: "Venmo", value: "@ghblin", emoji: "🔵" },
 ];
 
 export default function GiftRegistry() {

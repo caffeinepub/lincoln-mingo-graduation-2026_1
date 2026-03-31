@@ -148,12 +148,14 @@ export default function RSVPMessages() {
           transition={{ duration: 0.6 }}
           className="bg-charcoal-100 rounded-2xl p-7 gold-border card-glow"
         >
-          <h3 className="font-serif font-semibold text-xl text-gold mb-1 tracking-wide">
-            RSVP
-          </h3>
-          <p className="text-xs text-foreground/50 font-sans mb-6 uppercase tracking-[0.12em]">
-            Reserve your seat
-          </p>
+          <div className="text-center mb-6">
+            <h3 className="font-serif font-semibold text-xl text-gold mb-1 tracking-wide">
+              RSVP
+            </h3>
+            <p className="text-xs text-foreground/50 font-sans uppercase tracking-[0.12em]">
+              Reserve your seat
+            </p>
+          </div>
           <RSVPForm />
         </motion.div>
       </div>
