@@ -1,0 +1,158 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 18% 0.08 252;
+    --foreground: 92% 0 0;
+    --card: 22% 0.08 252;
+    --card-foreground: 92% 0 0;
+    --popover: 22% 0.08 252;
+    --popover-foreground: 92% 0 0;
+    --primary: 68% 0.13 72;
+    --primary-foreground: 18% 0.08 252;
+    --secondary: 22% 0.08 252;
+    --secondary-foreground: 92% 0 0;
+    --muted: 24% 0.07 252;
+    --muted-foreground: 72% 0.02 252;
+    --accent: 76% 0.12 78;
+    --accent-foreground: 18% 0.08 252;
+    --destructive: 50% 0.22 27;
+    --destructive-foreground: 98% 0 0;
+    --border: 63% 0.1 72;
+    --input: 16% 0.07 252;
+    --ring: 68% 0.13 72;
+    --radius: 0.75rem;
+  }
+
+  * {
+    border-color: oklch(var(--border) / 0.3);
+  }
+
+  body {
+    background-color: oklch(var(--background));
+    color: oklch(var(--foreground));
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Playfair Display", serif;
+  }
+}
+
+@layer components {
+  .font-script {
+    font-family: "Dancing Script", cursive;
+  }
+
+  .font-serif {
+    font-family: "Playfair Display", serif;
+  }
+
+  .gold-border {
+    border: 1px solid oklch(63% 0.1 72 / 0.5);
+  }
+
+  .gold-border-top {
+    border-top: 1px solid oklch(63% 0.1 72 / 0.6);
+  }
+
+  .gold-border-bottom {
+    border-bottom: 1px solid oklch(63% 0.1 72 / 0.6);
+  }
+
+  .crimson-border {
+    border: 1px solid oklch(42% 0.18 22 / 0.5);
+  }
+
+  .card-glow {
+    box-shadow: 0 0 30px oklch(68% 0.13 72 / 0.05), inset 0 1px 0
+      oklch(68% 0.13 72 / 0.08);
+  }
+
+  .text-gold {
+    color: oklch(68% 0.13 72);
+  }
+
+  .text-gold-light {
+    color: oklch(76% 0.12 78);
+  }
+
+  .text-muted-gold {
+    color: oklch(70% 0.01 252);
+  }
+
+  .text-crimson {
+    color: oklch(52% 0.18 22);
+  }
+
+  .bg-dark {
+    background-color: oklch(18% 0.08 252);
+  }
+
+  .bg-card-dark {
+    background-color: oklch(22% 0.08 252);
+  }
+
+  .btn-gold {
+    background-color: oklch(68% 0.13 72);
+    color: oklch(18% 0.08 252);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+
+  .btn-gold:hover {
+    background-color: oklch(76% 0.12 78);
+  }
+
+  .btn-gold-outline {
+    background-color: transparent;
+    border: 1px solid oklch(68% 0.13 72);
+    color: oklch(68% 0.13 72);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .btn-gold-outline:hover {
+    background-color: oklch(68% 0.13 72 / 0.1);
+  }
+
+  .btn-crimson-outline {
+    background-color: transparent;
+    border: 1px solid oklch(42% 0.18 22);
+    color: oklch(52% 0.18 22);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .btn-crimson-outline:hover {
+    background-color: oklch(42% 0.18 22 / 0.1);
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      oklch(42% 0.18 22 / 0.4),
+      transparent
+    );
+  }
+}
