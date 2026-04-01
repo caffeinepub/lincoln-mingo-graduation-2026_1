@@ -37,6 +37,18 @@ module {
     };
   };
 
+  // Anyone can call this ONCE — the first caller becomes admin permanently.
+  public func claimFirstAdmin(state : AccessControlState, caller : Principal) {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Anonymous callers cannot claim admin");
+    };
+    if (state.adminAssigned) {
+      Runtime.trap("Admin has already been assigned");
+    };
+    state.userRoles.add(caller, #admin);
+    state.adminAssigned := true;
+  };
+
   public func getUserRole(state : AccessControlState, caller : Principal) : UserRole {
     if (caller.isAnonymous()) { return #guest };
     switch (state.userRoles.get(caller)) {
@@ -63,5 +75,9 @@ module {
 
   public func isAdmin(state : AccessControlState, caller : Principal) : Bool {
     getUserRole(state, caller) == #admin;
+  };
+
+  public func isAdminAssigned(state : AccessControlState) : Bool {
+    state.adminAssigned;
   };
 };

@@ -19,10 +19,13 @@ export default function AdminDashboard() {
     useInternetIdentity();
   const { actor, isFetching: actorFetching } = useActor();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [adminTaken, setAdminTaken] = useState<boolean | null>(null);
   const [rsvps, setRsvps] = useState<RSVPEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [claiming, setClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const loadRSVPs = useCallback(async () => {
     if (!actor) return;
@@ -42,13 +45,18 @@ export default function AdminDashboard() {
     if (!actor) return;
     setChecking(true);
     try {
-      const result = await actor.isCallerAdmin();
-      setIsAdmin(result);
-      if (result) {
+      const [adminResult, taken] = await Promise.all([
+        actor.isCallerAdmin(),
+        actor.isAdminAssigned(),
+      ]);
+      setIsAdmin(adminResult);
+      setAdminTaken(taken);
+      if (adminResult) {
         await loadRSVPs();
       }
     } catch {
       setIsAdmin(false);
+      setAdminTaken(false);
     } finally {
       setChecking(false);
     }
@@ -61,6 +69,27 @@ export default function AdminDashboard() {
       setChecking(false);
     }
   }, [isInitializing, actorFetching, actor, checkAdmin]);
+
+  const handleClaimAdmin = async () => {
+    if (!actor) return;
+    setClaiming(true);
+    setClaimError(null);
+    try {
+      await actor.claimFirstAdmin();
+      await checkAdmin();
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("already been assigned")) {
+        setClaimError(
+          "Admin access has already been claimed by another login.",
+        );
+      } else {
+        setClaimError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   const handleBackToSite = () => {
     window.location.hash = "";
@@ -109,7 +138,7 @@ export default function AdminDashboard() {
             style={{ color: "#c9a84c" }}
           />
           <h1 className="text-2xl font-bold mb-2" style={{ color: "#c9a84c" }}>
-            Admin Access Required
+            Admin Access
           </h1>
           {!identity ? (
             <>
@@ -117,8 +146,7 @@ export default function AdminDashboard() {
                 className="mb-6 text-sm"
                 style={{ color: "rgba(255,255,255,0.7)" }}
               >
-                Please log in with Internet Identity to access the RSVP
-                dashboard.
+                Log in to access the RSVP dashboard.
               </p>
               <Button
                 onClick={login}
@@ -137,14 +165,57 @@ export default function AdminDashboard() {
                 )}
               </Button>
             </>
+          ) : adminTaken ? (
+            <>
+              <p
+                className="mb-6 text-sm"
+                style={{ color: "rgba(255,255,255,0.7)" }}
+              >
+                This account does not have admin access.
+              </p>
+              <Button
+                onClick={handleBackToSite}
+                variant="outline"
+                className="w-full"
+                style={{ borderColor: "#c9a84c", color: "#c9a84c" }}
+                data-ocid="admin.secondary_button"
+              >
+                Back to Site
+              </Button>
+            </>
           ) : (
             <>
               <p
                 className="mb-6 text-sm"
                 style={{ color: "rgba(255,255,255,0.7)" }}
               >
-                You don&apos;t have admin access to this dashboard.
+                You're logged in. Click below to activate admin access for this
+                account.
               </p>
+              {claimError && (
+                <p
+                  className="text-xs mb-3 text-red-400"
+                  data-ocid="admin.error_state"
+                >
+                  {claimError}
+                </p>
+              )}
+              <Button
+                onClick={handleClaimAdmin}
+                disabled={claiming}
+                className="w-full font-semibold text-base py-5 mb-3"
+                style={{ background: "#c9a84c", color: "#001533" }}
+                data-ocid="admin.primary_button"
+              >
+                {claiming ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Activating...
+                  </>
+                ) : (
+                  "Activate Admin Access"
+                )}
+              </Button>
               <Button
                 onClick={handleBackToSite}
                 variant="outline"

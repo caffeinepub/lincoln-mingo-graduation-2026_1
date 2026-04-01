@@ -188,4 +188,14 @@ actor {
     let arr = guestBookMessages.toArray();
     arr.sort();
   };
+
+  // Claim first admin - no token needed, first logged-in caller becomes admin permanently
+  public shared ({ caller }) func claimFirstAdmin() : async () {
+    AccessControl.claimFirstAdmin(accessControlState, caller);
+  };
+
+  // Check if admin has been assigned yet
+  public query func isAdminAssigned() : async Bool {
+    AccessControl.isAdminAssigned(accessControlState);
+  };
 };
