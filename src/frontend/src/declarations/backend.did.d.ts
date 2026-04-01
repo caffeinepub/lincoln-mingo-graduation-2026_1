@@ -88,6 +88,7 @@ export interface _SERVICE {
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
   'submitRSVPWithEmail' : ActorMethod<[string, string, boolean], undefined>,
   'updatePhoto' : ActorMethod<[], undefined>,
+  'getAllRSVPEntriesWithPin' : ActorMethod<[string], Array<RSVPEntry>>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

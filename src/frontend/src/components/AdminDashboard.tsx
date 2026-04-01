@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -8,88 +9,47 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Loader2, RefreshCw, Shield } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, Loader2, Lock, RefreshCw, Shield } from "lucide-react";
+import { useCallback, useState } from "react";
 import type { RSVPEntry } from "../backend.d";
 import { useActor } from "../hooks/useActor";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 export default function AdminDashboard() {
-  const { login, identity, isLoggingIn, isInitializing } =
-    useInternetIdentity();
   const { actor, isFetching: actorFetching } = useActor();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [adminTaken, setAdminTaken] = useState<boolean | null>(null);
+  const [pin, setPin] = useState("");
   const [rsvps, setRsvps] = useState<RSVPEntry[]>([]);
+  const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [claiming, setClaiming] = useState(false);
-  const [claimError, setClaimError] = useState<string | null>(null);
 
-  const loadRSVPs = useCallback(async () => {
-    if (!actor) return;
+  const handleUnlock = useCallback(async () => {
+    if (!actor || !pin.trim()) return;
     setLoading(true);
     setError(null);
     try {
-      const entries = await actor.getAllRSVPEntries();
+      const entries = await actor.getAllRSVPEntriesWithPin(pin.trim());
       setRsvps(entries);
+      setUnlocked(true);
     } catch {
-      setError("Failed to load RSVPs. Please try again.");
+      setError("Incorrect PIN. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [actor]);
+  }, [actor, pin]);
 
-  const checkAdmin = useCallback(async () => {
-    if (!actor) return;
-    setChecking(true);
+  const handleRefresh = useCallback(async () => {
+    if (!actor || !pin.trim()) return;
+    setLoading(true);
+    setError(null);
     try {
-      const [adminResult, taken] = await Promise.all([
-        actor.isCallerAdmin(),
-        actor.isAdminAssigned(),
-      ]);
-      setIsAdmin(adminResult);
-      setAdminTaken(taken);
-      if (adminResult) {
-        await loadRSVPs();
-      }
+      const entries = await actor.getAllRSVPEntriesWithPin(pin.trim());
+      setRsvps(entries);
     } catch {
-      setIsAdmin(false);
-      setAdminTaken(false);
+      setError("Failed to refresh. Please try again.");
     } finally {
-      setChecking(false);
+      setLoading(false);
     }
-  }, [actor, loadRSVPs]);
-
-  useEffect(() => {
-    if (!isInitializing && !actorFetching && actor) {
-      checkAdmin();
-    } else if (!isInitializing && !actorFetching && !actor) {
-      setChecking(false);
-    }
-  }, [isInitializing, actorFetching, actor, checkAdmin]);
-
-  const handleClaimAdmin = async () => {
-    if (!actor) return;
-    setClaiming(true);
-    setClaimError(null);
-    try {
-      await actor.claimFirstAdmin();
-      await checkAdmin();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes("already") && msg.toLowerCase().includes("assigned")) {
-        setClaimError(
-          "Admin access has already been claimed by another login.",
-        );
-      } else {
-        setClaimError("Something went wrong. Please try again.");
-      }
-    } finally {
-      setClaiming(false);
-    }
-  };
+  }, [actor, pin]);
 
   const handleBackToSite = () => {
     window.location.hash = "";
@@ -99,27 +59,21 @@ export default function AdminDashboard() {
   const attending = rsvps.filter((r) => r.attending).length;
   const notAttending = rsvps.filter((r) => !r.attending).length;
 
-  if (isInitializing || actorFetching || checking) {
+  if (actorFetching) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
         style={{ background: "#001533" }}
-        data-ocid="admin.loading_state"
       >
-        <div className="text-center">
-          <Loader2
-            className="h-10 w-10 animate-spin mx-auto mb-4"
-            style={{ color: "#c9a84c" }}
-          />
-          <p style={{ color: "#c9a84c" }} className="text-lg font-medium">
-            Verifying access...
-          </p>
-        </div>
+        <Loader2
+          className="h-10 w-10 animate-spin"
+          style={{ color: "#c9a84c" }}
+        />
       </div>
     );
   }
 
-  if (!identity || !isAdmin) {
+  if (!unlocked) {
     return (
       <div
         className="min-h-screen flex items-center justify-center px-4"
@@ -140,93 +94,61 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold mb-2" style={{ color: "#c9a84c" }}>
             Admin Access
           </h1>
-          {!identity ? (
-            <>
-              <p
-                className="mb-6 text-sm"
-                style={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                Log in to access the RSVP dashboard.
-              </p>
-              <Button
-                onClick={login}
-                disabled={isLoggingIn}
-                className="w-full font-semibold text-base py-6"
-                style={{ background: "#c9a84c", color: "#001533" }}
-                data-ocid="admin.primary_button"
-              >
-                {isLoggingIn ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Logging in...
-                  </>
-                ) : (
-                  "Login with Internet Identity"
-                )}
-              </Button>
-            </>
-          ) : adminTaken ? (
-            <>
-              <p
-                className="mb-6 text-sm"
-                style={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                This account does not have admin access.
-              </p>
-              <Button
-                onClick={handleBackToSite}
-                variant="outline"
-                className="w-full"
-                style={{ borderColor: "#c9a84c", color: "#c9a84c" }}
-                data-ocid="admin.secondary_button"
-              >
-                Back to Site
-              </Button>
-            </>
-          ) : (
-            <>
-              <p
-                className="mb-6 text-sm"
-                style={{ color: "rgba(255,255,255,0.7)" }}
-              >
-                You're logged in. Click below to activate admin access for this
-                account.
-              </p>
-              {claimError && (
-                <p
-                  className="text-xs mb-3 text-red-400"
-                  data-ocid="admin.error_state"
-                >
-                  {claimError}
-                </p>
-              )}
-              <Button
-                onClick={handleClaimAdmin}
-                disabled={claiming}
-                className="w-full font-semibold text-base py-5 mb-3"
-                style={{ background: "#c9a84c", color: "#001533" }}
-                data-ocid="admin.primary_button"
-              >
-                {claiming ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Activating...
-                  </>
-                ) : (
-                  "Activate Admin Access"
-                )}
-              </Button>
-              <Button
-                onClick={handleBackToSite}
-                variant="outline"
-                className="w-full"
-                style={{ borderColor: "#c9a84c", color: "#c9a84c" }}
-                data-ocid="admin.secondary_button"
-              >
-                Back to Site
-              </Button>
-            </>
+          <p
+            className="mb-6 text-sm"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
+            Enter your admin PIN to view RSVPs.
+          </p>
+          <div className="relative mb-3">
+            <Lock
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+              style={{ color: "rgba(255,255,255,0.4)" }}
+            />
+            <Input
+              type="password"
+              placeholder="Admin PIN"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
+              className="pl-9 text-white placeholder:text-white/40 border-white/20 focus:border-yellow-500"
+              style={{ background: "rgba(255,255,255,0.05)" }}
+              data-ocid="admin.input"
+            />
+          </div>
+          {error && (
+            <p
+              className="text-red-400 text-sm mb-3"
+              data-ocid="admin.error_state"
+            >
+              {error}
+            </p>
           )}
+          <Button
+            onClick={handleUnlock}
+            disabled={loading || !pin.trim()}
+            className="w-full font-semibold text-base py-5 mb-3"
+            style={{ background: "#c9a84c", color: "#001533" }}
+            data-ocid="admin.primary_button"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              "Access Dashboard"
+            )}
+          </Button>
+          <Button
+            onClick={handleBackToSite}
+            variant="outline"
+            className="w-full"
+            style={{ borderColor: "#c9a84c", color: "#c9a84c" }}
+            data-ocid="admin.cancel_button"
+          >
+            Back to Site
+          </Button>
         </div>
       </div>
     );
@@ -239,7 +161,6 @@ export default function AdminDashboard() {
       data-ocid="admin.page"
     >
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold" style={{ color: "#c9a84c" }}>
@@ -249,12 +170,12 @@ export default function AdminDashboard() {
               className="mt-1 text-sm"
               style={{ color: "rgba(255,255,255,0.6)" }}
             >
-              Lincoln Mingo Graduation 2026 &mdash; Class of Red Oak High School
+              Lincoln Mingo Graduation 2026 &mdash; Red Oak High School
             </p>
           </div>
           <div className="flex gap-3">
             <Button
-              onClick={loadRSVPs}
+              onClick={handleRefresh}
               disabled={loading}
               variant="outline"
               className="gap-2"
@@ -287,7 +208,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div
             className="rounded-xl p-5 text-center"
@@ -341,7 +261,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Error state */}
         {error && (
           <div
             className="rounded-xl p-4 mb-6 text-center"
@@ -355,7 +274,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Table */}
         <div
           className="rounded-2xl overflow-hidden"
           style={{

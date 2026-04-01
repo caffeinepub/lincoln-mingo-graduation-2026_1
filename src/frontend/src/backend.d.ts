@@ -66,6 +66,7 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     isAdminAssigned(): Promise<boolean>;
     claimFirstAdmin(): Promise<void>;
+    getAllRSVPEntriesWithPin(pin: string): Promise<Array<RSVPEntry>>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
     submitRSVPWithEmail(name: string, email: string, attending: boolean): Promise<void>;

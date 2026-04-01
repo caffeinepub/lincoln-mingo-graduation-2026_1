@@ -41,8 +41,9 @@ module {
     if (caller.isAnonymous()) { return #guest };
     switch (state.userRoles.get(caller)) {
       case (?role) { role };
-      // Unknown users are treated as guests, not an error
-      case (null) { #guest };
+      case (null) {
+        Runtime.trap("User is not registered");
+      };
     };
   };
 
@@ -62,9 +63,5 @@ module {
 
   public func isAdmin(state : AccessControlState, caller : Principal) : Bool {
     getUserRole(state, caller) == #admin;
-  };
-
-  public func isAdminAssigned(state : AccessControlState) : Bool {
-    state.adminAssigned;
   };
 };

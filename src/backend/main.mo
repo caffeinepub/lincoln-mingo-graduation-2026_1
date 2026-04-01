@@ -213,4 +213,15 @@ actor {
       Runtime.trap("Admin has already been assigned to another account.");
     };
   };
+
+  // Admin PIN for direct access (no Internet Identity required)
+  let adminPin : Text = "REDOAK2026";
+
+  // Get all RSVPs with PIN verification - works on any device
+  public query func getAllRSVPEntriesWithPin(pin : Text) : async [RSVPEntry] {
+    if (pin != adminPin) {
+      Runtime.trap("Invalid admin PIN");
+    };
+    rsvpEntries.toArray();
+  };
 };
