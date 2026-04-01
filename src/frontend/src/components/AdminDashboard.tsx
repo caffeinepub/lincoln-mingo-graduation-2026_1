@@ -79,7 +79,7 @@ export default function AdminDashboard() {
       await checkAdmin();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes("already been assigned")) {
+      if (msg.includes("already") && msg.toLowerCase().includes("assigned")) {
         setClaimError(
           "Admin access has already been claimed by another login.",
         );

@@ -189,13 +189,28 @@ actor {
     arr.sort();
   };
 
-  // Claim first admin - no token needed, first logged-in caller becomes admin permanently
-  public shared ({ caller }) func claimFirstAdmin() : async () {
-    AccessControl.claimFirstAdmin(accessControlState, caller);
-  };
-
   // Check if admin has been assigned yet
   public query func isAdminAssigned() : async Bool {
-    AccessControl.isAdminAssigned(accessControlState);
+    accessControlState.adminAssigned;
+  };
+
+  // Claim first admin - any logged-in user can become admin if no admin assigned yet.
+  // If caller is already admin, succeeds silently.
+  // If admin already taken by someone else, traps with clear message.
+  public shared ({ caller }) func claimFirstAdmin() : async () {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Must be logged in to claim admin");
+    };
+    // If caller is already admin, nothing to do
+    if (AccessControl.isAdmin(accessControlState, caller)) {
+      return;
+    };
+    // If no admin assigned yet, grant admin to this caller
+    if (not accessControlState.adminAssigned) {
+      accessControlState.userRoles.add(caller, #admin);
+      accessControlState.adminAssigned := true;
+    } else {
+      Runtime.trap("Admin has already been assigned to another account.");
+    };
   };
 };
