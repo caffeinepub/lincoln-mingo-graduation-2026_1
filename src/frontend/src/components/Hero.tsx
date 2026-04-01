@@ -17,7 +17,7 @@ export default function Hero() {
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="space-y-6"
+            className="space-y-6 flex flex-col items-center text-center"
           >
             <div>
               <p
@@ -26,15 +26,15 @@ export default function Hero() {
               >
                 Graduation
               </p>
-              <h1 className="font-serif font-bold uppercase text-4xl sm:text-5xl lg:text-6xl text-gold tracking-[0.08em] leading-tight">
+              <h1 className="font-serif font-bold uppercase text-4xl sm:text-5xl lg:text-6xl text-gold tracking-[0.08em] leading-tight text-center">
                 Lincoln Mingo
               </h1>
-              <p className="mt-3 text-xs uppercase tracking-[0.25em] text-crimson font-sans font-semibold">
+              <p className="mt-3 text-xs uppercase tracking-[0.25em] text-crimson font-sans font-semibold text-center">
                 Red Oak High School &nbsp;·&nbsp; Class of 2026
               </p>
             </div>
 
-            <p className="text-foreground/80 font-sans text-base leading-relaxed max-w-md">
+            <p className="text-foreground/80 font-sans text-base leading-relaxed max-w-md mx-auto text-center">
               This is more than a Graduation. This is the moment everything
               shifts. After years of discipline, growth, and rising into who
               he's meant to be—Lincoln Mingo is stepping into his next level.

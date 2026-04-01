@@ -45,7 +45,7 @@ export default function GiftRegistry() {
             <div
               key={method.label}
               data-ocid={`gifts.item.${i + 1}`}
-              className="flex items-center justify-between px-6 py-4 rounded-xl bg-charcoal-100 gold-border"
+              className="flex flex-col items-center gap-2 px-6 py-4 rounded-xl bg-charcoal-100 gold-border text-center"
             >
               <div className="flex items-center gap-3">
                 <span className="text-xl">{method.emoji}</span>
