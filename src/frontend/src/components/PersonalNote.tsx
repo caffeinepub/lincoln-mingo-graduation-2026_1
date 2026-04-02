@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 const sonSlidePhotos = [
   "/assets/img_1230-019d4e56-3df5-76d0-a8e9-ce4c11fe957b.jpeg",
   "/assets/img_0933-019d4e6d-c54e-762d-8b52-183248d5daaa.jpeg",
-  "/assets/img_1230-019d4e6d-c580-751a-859a-96ca28f47628.jpeg",
 ];
 
 // Duplicate photos so the scroll loop is seamless
@@ -40,7 +39,7 @@ function SonScrollStrip() {
         className="flex h-full gap-4 items-center"
         style={{
           width: "max-content",
-          animation: "scrollStrip 18s linear infinite",
+          animation: "scrollStrip 14s linear infinite",
         }}
       >
         {loopedPhotos.map((src, i) => (
