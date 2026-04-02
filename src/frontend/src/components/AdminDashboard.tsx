@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowLeft, Loader2, Lock, RefreshCw, Shield } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { RSVPEntry } from "../backend.d";
 import { useActor } from "../hooks/useActor";
 
@@ -21,6 +21,14 @@ export default function AdminDashboard() {
   const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pinInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus PIN input once actor is ready
+  useEffect(() => {
+    if (!actorFetching && actor && !unlocked) {
+      pinInputRef.current?.focus();
+    }
+  }, [actorFetching, actor, unlocked]);
 
   const handleUnlock = useCallback(async () => {
     if (!actor || !pin.trim()) return;
@@ -30,8 +38,8 @@ export default function AdminDashboard() {
       const entries = await actor.getAllRSVPEntriesWithPin(pin.trim());
       setRsvps(entries);
       setUnlocked(true);
-    } catch {
-      setError("Incorrect PIN. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -44,8 +52,8 @@ export default function AdminDashboard() {
     try {
       const entries = await actor.getAllRSVPEntriesWithPin(pin.trim());
       setRsvps(entries);
-    } catch {
-      setError("Failed to refresh. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -69,6 +77,35 @@ export default function AdminDashboard() {
           className="h-10 w-10 animate-spin"
           style={{ color: "#c9a84c" }}
         />
+      </div>
+    );
+  }
+
+  // Actor failed to connect
+  if (!actor) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-4"
+        style={{ background: "#001533" }}
+      >
+        <div
+          className="w-full max-w-sm rounded-2xl p-8 text-center"
+          style={{
+            background: "#001f4d",
+            border: "1px solid rgba(201,168,76,0.3)",
+          }}
+        >
+          <p className="text-red-400 text-base mb-4">
+            Unable to connect to backend. Please refresh the page.
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="w-full font-semibold"
+            style={{ background: "#c9a84c", color: "#001533" }}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
     );
   }
@@ -100,22 +137,33 @@ export default function AdminDashboard() {
           >
             Enter your admin PIN to view RSVPs.
           </p>
-          <div className="relative mb-3">
+          <div className="relative mb-1">
             <Lock
               className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
               style={{ color: "rgba(255,255,255,0.4)" }}
             />
             <Input
-              type="password"
+              ref={pinInputRef}
+              type="text"
               placeholder="Admin PIN"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="off"
+              spellCheck={false}
               className="pl-9 text-white placeholder:text-white/40 border-white/20 focus:border-yellow-500"
               style={{ background: "rgba(255,255,255,0.05)" }}
               data-ocid="admin.input"
             />
           </div>
+          <p
+            className="text-xs mb-3"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+          >
+            PIN is case-sensitive
+          </p>
           {error && (
             <p
               className="text-red-400 text-sm mb-3"
