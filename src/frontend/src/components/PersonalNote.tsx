@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
 
 const sonSlidePhotos = [
   "/assets/img_1230-019d4e56-3df5-76d0-a8e9-ce4c11fe957b.jpeg",
@@ -7,62 +6,64 @@ const sonSlidePhotos = [
   "/assets/img_1230-019d4e6d-c580-751a-859a-96ca28f47628.jpeg",
 ];
 
-function SonSlideshow() {
-  const [current, setCurrent] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+// Duplicate photos so the scroll loop is seamless
+const loopedPhotos = [...sonSlidePhotos, ...sonSlidePhotos, ...sonSlidePhotos];
 
-  useEffect(() => {
-    if (isPaused) return;
-    timerRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % sonSlidePhotos.length);
-    }, 3000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPaused]);
-
+function SonScrollStrip() {
   return (
     <div
-      className="relative w-full max-w-sm mx-auto mb-8 rounded-xl overflow-hidden"
+      className="relative w-full mb-8 overflow-hidden rounded-xl"
       style={{
         border: "2px solid oklch(68% 0.13 72 / 0.4)",
         boxShadow: "0 8px 32px oklch(0% 0 0 / 0.4)",
-        aspectRatio: "4/5",
+        height: "260px",
       }}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      onTouchStart={() => setIsPaused(true)}
-      onTouchEnd={() => setIsPaused(false)}
     >
-      {sonSlidePhotos.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt={`Lincoln ${i + 1}`}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-          style={{ opacity: i === current ? 1 : 0 }}
-        />
-      ))}
-      {/* Dot indicators */}
-      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
-        {sonSlidePhotos.map((src, i) => (
-          <button
-            type="button"
-            key={src}
-            onClick={() => setCurrent(i)}
-            className="rounded-full transition-all"
-            style={{
-              width: i === current ? "20px" : "8px",
-              height: "8px",
-              background:
-                i === current
-                  ? "oklch(68% 0.13 72)"
-                  : "oklch(68% 0.13 72 / 0.4)",
-            }}
+      {/* Fade edges */}
+      <div
+        className="absolute inset-y-0 left-0 z-10 w-12 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to right, oklch(15% 0.012 252), transparent)",
+        }}
+      />
+      <div
+        className="absolute inset-y-0 right-0 z-10 w-12 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to left, oklch(15% 0.012 252), transparent)",
+        }}
+      />
+
+      {/* Scrolling strip */}
+      <div
+        className="flex h-full gap-4 items-center"
+        style={{
+          width: "max-content",
+          animation: "scrollStrip 18s linear infinite",
+        }}
+      >
+        {loopedPhotos.map((src, i) => (
+          <img
+            // biome-ignore lint/suspicious/noArrayIndexKey: intentional duplicate list for looping
+            key={i}
+            src={src}
+            alt={`Lincoln ${(i % sonSlidePhotos.length) + 1}`}
+            className="h-full rounded-lg object-cover flex-shrink-0"
+            style={{ width: "200px", aspectRatio: "2/3" }}
           />
         ))}
       </div>
+
+      <style>{`
+        @keyframes scrollStrip {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(calc(-200px * ${sonSlidePhotos.length} - 1rem * ${sonSlidePhotos.length})); }
+        }
+        .son-strip:hover > div {
+          animation-play-state: paused;
+        }
+      `}</style>
     </div>
   );
 }
@@ -126,8 +127,8 @@ export default function PersonalNote() {
               <div className="section-divider mt-5 max-w-xs mx-auto" />
             </div>
 
-            {/* Auto-scrolling photo slideshow */}
-            <SonSlideshow />
+            {/* Left-to-right auto-scrolling photo strip */}
+            <SonScrollStrip />
 
             <blockquote className="space-y-5">
               <p className="font-script text-3xl text-gold/90 text-center">
