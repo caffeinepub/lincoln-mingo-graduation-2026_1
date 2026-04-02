@@ -12,6 +12,21 @@ process.env.II_URL = process.env.II_URL || ii_url;
 process.env.STORAGE_GATEWAY_URL =
   process.env.STORAGE_GATEWAY_URL || "https://blob.caffeine.ai";
 
+// Resolve the canonical site URL for Open Graph meta tags
+// During ICP builds, CANISTER_ID_FRONTEND is injected automatically.
+const frontendCanisterId = process.env.CANISTER_ID_FRONTEND;
+const siteUrl = frontendCanisterId
+  ? `https://${frontendCanisterId}.icp0.io`
+  : "https://lincolnmingo2026.icp0.io";
+
+// Vite plugin that replaces __SITE_URL__ in index.html at build time
+const replaceSiteUrl = () => ({
+  name: "replace-site-url",
+  transformIndexHtml(html) {
+    return html.replace(/__SITE_URL__/g, siteUrl);
+  },
+});
+
 export default defineConfig({
   logLevel: "error",
   build: {
@@ -42,6 +57,7 @@ export default defineConfig({
     environment("all", { prefix: "DFX_" }),
     environment(["II_URL"]),
     environment(["STORAGE_GATEWAY_URL"]),
+    replaceSiteUrl(),
     react(),
   ],
   resolve: {

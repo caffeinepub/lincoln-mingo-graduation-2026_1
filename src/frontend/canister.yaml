@@ -17,20 +17,6 @@ build:
           }
           EOF
         - pnpm --filter '@caffeine/template-frontend' build:skip-bindings
-        - |
-          # Inject absolute site URL into og:image meta tags for social preview
-          if [ -n "$FRONTEND_CANISTER_ID" ]; then
-            SITE_URL="https://${FRONTEND_CANISTER_ID}.icp0.io"
-          elif [ -n "$CANISTER_ID_FRONTEND" ]; then
-            SITE_URL="https://${CANISTER_ID_FRONTEND}.icp0.io"
-          else
-            SITE_URL=""
-          fi
-          if [ -n "$SITE_URL" ]; then
-            sed -i "s|__SITE_URL__|${SITE_URL}|g" dist/index.html
-          else
-            sed -i "s|__SITE_URL__||g" dist/index.html
-          fi
 
     - type: pre-built
       url: https://github.com/dfinity/sdk/raw/refs/tags/0.27.0/src/distributed/assetstorage.wasm.gz
