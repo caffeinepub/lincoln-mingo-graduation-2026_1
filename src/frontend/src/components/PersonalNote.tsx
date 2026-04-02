@@ -1,4 +1,71 @@
 import { motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+
+const sonSlidePhotos = [
+  "/assets/img_1230-019d4e56-3df5-76d0-a8e9-ce4c11fe957b.jpeg",
+  "/assets/img_0933-019d4e6d-c54e-762d-8b52-183248d5daaa.jpeg",
+  "/assets/img_1230-019d4e6d-c580-751a-859a-96ca28f47628.jpeg",
+];
+
+function SonSlideshow() {
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (isPaused) return;
+    timerRef.current = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % sonSlidePhotos.length);
+    }, 3000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPaused]);
+
+  return (
+    <div
+      className="relative w-full max-w-sm mx-auto mb-8 rounded-xl overflow-hidden"
+      style={{
+        border: "2px solid oklch(68% 0.13 72 / 0.4)",
+        boxShadow: "0 8px 32px oklch(0% 0 0 / 0.4)",
+        aspectRatio: "4/5",
+      }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
+      {sonSlidePhotos.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt={`Lincoln ${i + 1}`}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+          style={{ opacity: i === current ? 1 : 0 }}
+        />
+      ))}
+      {/* Dot indicators */}
+      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+        {sonSlidePhotos.map((src, i) => (
+          <button
+            type="button"
+            key={src}
+            onClick={() => setCurrent(i)}
+            className="rounded-full transition-all"
+            style={{
+              width: i === current ? "20px" : "8px",
+              height: "8px",
+              background:
+                i === current
+                  ? "oklch(68% 0.13 72)"
+                  : "oklch(68% 0.13 72 / 0.4)",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function PersonalNote() {
   return (
@@ -59,22 +126,16 @@ export default function PersonalNote() {
               <div className="section-divider mt-5 max-w-xs mx-auto" />
             </div>
 
-            {/* Photo at top of section */}
-            <div className="flex justify-center mb-8">
-              <img
-                src="/assets/img_1230-019d4e56-3df5-76d0-a8e9-ce4c11fe957b.jpeg"
-                alt="Lincoln and Mom"
-                className="rounded-xl w-full max-w-sm object-cover"
-                style={{
-                  border: "2px solid oklch(68% 0.13 72 / 0.4)",
-                  boxShadow: "0 8px 32px oklch(0% 0 0 / 0.4)",
-                }}
-              />
-            </div>
+            {/* Auto-scrolling photo slideshow */}
+            <SonSlideshow />
 
             <blockquote className="space-y-5">
               <p className="font-script text-3xl text-gold/90 text-center">
                 Linc (My Sonshine),
+              </p>
+              <p className="font-sans text-base text-foreground/85 leading-relaxed text-center">
+                Watching you grow into a Handsome, Smart, Strong, Determined,
+                Kind, Business Oriented, Amazing Young Man.
               </p>
               <p className="font-sans text-base text-foreground/85 leading-relaxed text-center">
                 Watching you grow into the Smart, Strong, Kind, Amazing Young
