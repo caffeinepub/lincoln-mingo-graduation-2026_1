@@ -141,10 +141,10 @@ export default function PersonalNote() {
                 Watching you grow into the Smart, Strong, Kind, Amazing Young
                 Man you are today is the greatest honor and joy of my life. From
                 the moment you came into this world, it's been you and me &amp;
-                we conquer🙌🏽. I wouldn't trade one single second of it. You
-                are truly the love of my life, baby. From the moment you came
-                into this world, it's been you and me against everything, and I
-                would do EVERY single second again with no question.
+                we conquer🙌🏽. I wouldn't trade one single second of it. From
+                the moment you came into this world, it's been you and me
+                against everything, and I would do EVERY single second again
+                with no question.
               </p>
               <p className="font-sans text-base text-foreground/85 leading-relaxed text-center">
                 This moment belongs to you. I see every late night, every
