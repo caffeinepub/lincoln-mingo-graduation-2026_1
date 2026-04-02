@@ -8,9 +8,8 @@
     <meta property="og:title" content="Lincoln Mingo • Class of 2026 🎓" />
     <meta property="og:description" content="Red Oak High School Class of 2026 — Graduation Celebration. May 28, 2026 | 4:00 PM | Mansfield, TX. You're invited!" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="__SITE_URL__" />
     <meta property="og:site_name" content="Lincoln Mingo Graduation 2026" />
-    <meta property="og:image" content="__SITE_URL__/assets/img_1236-019d4eb5-3204-72aa-8d8d-e7cb7d2bcc0a.jpeg" />
+    <meta property="og:image" content="/assets/img_1235-019d4eab-fcca-7778-b3a2-55f7c6a66752.jpeg" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -19,12 +18,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Lincoln Mingo • Class of 2026 🎓" />
     <meta name="twitter:description" content="Red Oak High School Class of 2026 — Graduation Celebration. May 28, 2026 | 4:00 PM | Mansfield, TX. You're invited!" />
-    <meta name="twitter:image" content="__SITE_URL__/assets/img_1236-019d4eb5-3204-72aa-8d8d-e7cb7d2bcc0a.jpeg" />
+    <meta name="twitter:image" content="/assets/img_1235-019d4eab-fcca-7778-b3a2-55f7c6a66752.jpeg" />
     <meta name="twitter:image:alt" content="Lincoln Mingo - Class of 2026" />
-    <script type="module" crossorigin src="/assets/index-98y08hh6.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BmJeD8xt.css">
   </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
