@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 const navLinks = [
   { label: "Event Info", href: "#event" },
@@ -13,8 +12,6 @@ const navLinks = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [pendingAdminNav, setPendingAdminNav] = useState(false);
-  const { login, identity, isLoggingIn } = useInternetIdentity();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -22,22 +19,9 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Once identity is available after login, navigate to admin
-  useEffect(() => {
-    if (pendingAdminNav && identity) {
-      setPendingAdminNav(false);
-      window.location.hash = "#admin";
-    }
-  }, [pendingAdminNav, identity]);
-
   const handleAdminLogin = () => {
     setMenuOpen(false);
-    if (identity) {
-      window.location.hash = "#admin";
-    } else {
-      setPendingAdminNav(true);
-      login();
-    }
+    window.location.hash = "#admin";
   };
 
   return (
@@ -83,11 +67,10 @@ export default function Header() {
             <button
               type="button"
               onClick={handleAdminLogin}
-              disabled={isLoggingIn}
               data-ocid="nav.admin_login.link"
-              className="text-xs uppercase tracking-[0.18em] text-foreground/40 hover:text-gold/80 transition-colors duration-200 disabled:opacity-50"
+              className="text-xs uppercase tracking-[0.18em] text-foreground/40 hover:text-gold/80 transition-colors duration-200"
             >
-              {isLoggingIn ? "Logging in..." : "Admin Login"}
+              Admin
             </button>
           </nav>
 
@@ -163,11 +146,10 @@ export default function Header() {
               <button
                 type="button"
                 onClick={handleAdminLogin}
-                disabled={isLoggingIn}
-                className="flex items-center min-h-[44px] text-xs uppercase tracking-[0.18em] text-foreground/40 hover:text-gold/80 transition-colors px-1 disabled:opacity-50"
+                className="flex items-center min-h-[44px] text-xs uppercase tracking-[0.18em] text-foreground/40 hover:text-gold/80 transition-colors px-1"
                 data-ocid="mobile_nav.admin_login.link"
               >
-                {isLoggingIn ? "Logging in..." : "Admin Login"}
+                Admin
               </button>
               <button
                 type="button"

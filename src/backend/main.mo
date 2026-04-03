@@ -27,6 +27,9 @@ actor {
   // Initialize invite links
   let inviteState = InviteLinksModule.initState();
 
+  // Kept for stable variable compatibility with previous version
+  let adminPin : Text = "REDOAK2026";
+
   // User Profile Management
   public type UserProfile = {
     name : Text;
@@ -108,11 +111,8 @@ actor {
     rsvpEntries.add(entry);
   };
 
-  // Get all email RSVPs - Admin only
-  public query ({ caller }) func getAllRSVPEntries() : async [RSVPEntry] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view RSVPs");
-    };
+  // Get all email RSVPs - Public (no auth required)
+  public query func getAllRSVPEntries() : async [RSVPEntry] {
     rsvpEntries.toArray();
   };
 
@@ -195,17 +195,13 @@ actor {
   };
 
   // Claim first admin - any logged-in user can become admin if no admin assigned yet.
-  // If caller is already admin, succeeds silently.
-  // If admin already taken by someone else, traps with clear message.
   public shared ({ caller }) func claimFirstAdmin() : async () {
     if (caller.isAnonymous()) {
       Runtime.trap("Must be logged in to claim admin");
     };
-    // If caller is already admin, nothing to do
     if (AccessControl.isAdmin(accessControlState, caller)) {
       return;
     };
-    // If no admin assigned yet, grant admin to this caller
     if (not accessControlState.adminAssigned) {
       accessControlState.userRoles.add(caller, #admin);
       accessControlState.adminAssigned := true;
@@ -214,14 +210,8 @@ actor {
     };
   };
 
-  // Admin PIN for direct access (no Internet Identity required)
-  let adminPin : Text = "REDOAK2026";
-
-  // Get all RSVPs with PIN verification - works on any device
+  // Legacy PIN function - no longer requires PIN, kept for API compatibility
   public query func getAllRSVPEntriesWithPin(pin : Text) : async [RSVPEntry] {
-    if (pin != adminPin) {
-      Runtime.trap("Invalid admin PIN");
-    };
     rsvpEntries.toArray();
   };
 };

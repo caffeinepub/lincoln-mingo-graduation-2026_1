@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,55 +8,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Loader2, Lock, RefreshCw, Shield } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import type { RSVPEntry } from "../backend.d";
 import { useActor } from "../hooks/useActor";
 
 export default function AdminDashboard() {
   const { actor, isFetching: actorFetching } = useActor();
-  const [pin, setPin] = useState("");
   const [rsvps, setRsvps] = useState<RSVPEntry[]>([]);
-  const [unlocked, setUnlocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pinInputRef = useRef<HTMLInputElement>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  // Auto-focus PIN input once actor is ready
+  const fetchRSVPs = useCallback(async () => {
+    if (!actor) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const entries = await actor.getAllRSVPEntries();
+      setRsvps(entries);
+      setLoaded(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [actor]);
+
+  // Auto-load RSVPs as soon as actor is ready
   useEffect(() => {
-    if (!actorFetching && actor && !unlocked) {
-      pinInputRef.current?.focus();
+    if (actor && !loaded && !loading) {
+      fetchRSVPs();
     }
-  }, [actorFetching, actor, unlocked]);
-
-  const handleUnlock = useCallback(async () => {
-    if (!actor || !pin.trim()) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const entries = await actor.getAllRSVPEntriesWithPin(pin.trim());
-      setRsvps(entries);
-      setUnlocked(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [actor, pin]);
-
-  const handleRefresh = useCallback(async () => {
-    if (!actor || !pin.trim()) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const entries = await actor.getAllRSVPEntriesWithPin(pin.trim());
-      setRsvps(entries);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [actor, pin]);
+  }, [actor, loaded, loading, fetchRSVPs]);
 
   const handleBackToSite = () => {
     window.location.hash = "";
@@ -67,7 +50,7 @@ export default function AdminDashboard() {
   const attending = rsvps.filter((r) => r.attending).length;
   const notAttending = rsvps.filter((r) => !r.attending).length;
 
-  if (actorFetching) {
+  if (actorFetching || (!loaded && loading)) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -81,7 +64,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // Actor failed to connect
   if (!actor) {
     return (
       <div
@@ -96,7 +78,7 @@ export default function AdminDashboard() {
           }}
         >
           <p className="text-red-400 text-base mb-4">
-            Unable to connect to backend. Please refresh the page.
+            Unable to connect. Please refresh the page.
           </p>
           <Button
             onClick={() => window.location.reload()}
@@ -104,98 +86,6 @@ export default function AdminDashboard() {
             style={{ background: "#c9a84c", color: "#001533" }}
           >
             Refresh
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!unlocked) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: "#001533" }}
-        data-ocid="admin.panel"
-      >
-        <div
-          className="w-full max-w-sm rounded-2xl p-8 text-center"
-          style={{
-            background: "#001f4d",
-            border: "1px solid rgba(201,168,76,0.3)",
-          }}
-        >
-          <Shield
-            className="h-12 w-12 mx-auto mb-4"
-            style={{ color: "#c9a84c" }}
-          />
-          <h1 className="text-2xl font-bold mb-2" style={{ color: "#c9a84c" }}>
-            Admin Access
-          </h1>
-          <p
-            className="mb-6 text-sm"
-            style={{ color: "rgba(255,255,255,0.6)" }}
-          >
-            Enter your admin PIN to view RSVPs.
-          </p>
-          <div className="relative mb-1">
-            <Lock
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
-              style={{ color: "rgba(255,255,255,0.4)" }}
-            />
-            <Input
-              ref={pinInputRef}
-              type="text"
-              placeholder="Admin PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
-              autoCapitalize="none"
-              autoCorrect="off"
-              autoComplete="off"
-              spellCheck={false}
-              className="pl-9 text-white placeholder:text-white/40 border-white/20 focus:border-yellow-500"
-              style={{ background: "rgba(255,255,255,0.05)" }}
-              data-ocid="admin.input"
-            />
-          </div>
-          <p
-            className="text-xs mb-3"
-            style={{ color: "rgba(255,255,255,0.35)" }}
-          >
-            PIN is case-sensitive
-          </p>
-          {error && (
-            <p
-              className="text-red-400 text-sm mb-3"
-              data-ocid="admin.error_state"
-            >
-              {error}
-            </p>
-          )}
-          <Button
-            onClick={handleUnlock}
-            disabled={loading || !pin.trim()}
-            className="w-full font-semibold text-base py-5 mb-3"
-            style={{ background: "#c9a84c", color: "#001533" }}
-            data-ocid="admin.primary_button"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              "Access Dashboard"
-            )}
-          </Button>
-          <Button
-            onClick={handleBackToSite}
-            variant="outline"
-            className="w-full"
-            style={{ borderColor: "#c9a84c", color: "#c9a84c" }}
-            data-ocid="admin.cancel_button"
-          >
-            Back to Site
           </Button>
         </div>
       </div>
@@ -223,7 +113,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex gap-3">
             <Button
-              onClick={handleRefresh}
+              onClick={fetchRSVPs}
               disabled={loading}
               variant="outline"
               className="gap-2"
@@ -319,6 +209,13 @@ export default function AdminDashboard() {
             data-ocid="admin.error_state"
           >
             <p className="text-red-400">{error}</p>
+            <Button
+              onClick={fetchRSVPs}
+              className="mt-3"
+              style={{ background: "#c9a84c", color: "#001533" }}
+            >
+              Retry
+            </Button>
           </div>
         )}
 

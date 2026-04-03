@@ -135,14 +135,10 @@ export default function PersonalNote() {
               </p>
               <p className="font-sans text-base text-foreground/85 leading-relaxed text-center">
                 Watching you grow into a Handsome, Smart, Strong, Determined,
-                Kind, Business Oriented, Amazing Young Man.
-              </p>
-              <p className="font-sans text-base text-foreground/85 leading-relaxed text-center">
-                Watching you grow into the Smart, Strong, Kind, Amazing Young
-                Man you are today is the greatest honor and joy of my life. From
-                the moment you came into this world, it's been you and me &amp;
-                we conquer🙌🏽. I wouldn't trade one single second of it. I
-                would do EVERY single second again with no question.
+                Kind, Business Oriented, Amazing Young Man. From the moment you
+                came into this world, it's been you and me &amp; we conquer🙌🏽.
+                I wouldn't trade one single second of it. I would do EVERY
+                single second again with no question.
               </p>
               <p className="font-sans text-base text-foreground/85 leading-relaxed text-center">
                 This moment belongs to you. I see every late night, every
