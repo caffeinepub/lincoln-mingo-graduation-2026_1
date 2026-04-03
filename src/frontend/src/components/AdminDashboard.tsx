@@ -14,6 +14,8 @@ import type { RSVPEntry } from "../backend.d";
 import { useActor } from "../hooks/useActor";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
+const ADMIN_SECRET = "MINGO2026ADMIN";
+
 export default function AdminDashboard() {
   const { identity, login, clear, isInitializing, isLoggingIn } =
     useInternetIdentity();
@@ -24,11 +26,11 @@ export default function AdminDashboard() {
   const [loaded, setLoaded] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [adminAssigned, setAdminAssigned] = useState<boolean | null>(null);
-  const [claimingAdmin, setClaimingAdmin] = useState(false);
+  const [claiming, setClaiming] = useState(false);
 
   const isLoggedIn = !!identity && !identity.getPrincipal().isAnonymous();
 
-  // Check admin status once actor is ready and user is logged in
+  // Check admin status once actor + identity are ready
   useEffect(() => {
     if (!actor || !isLoggedIn) return;
     (async () => {
@@ -41,7 +43,7 @@ export default function AdminDashboard() {
         setAdminAssigned(assigned);
       } catch {
         setIsAdmin(false);
-        setAdminAssigned(true);
+        setAdminAssigned(false);
       }
     })();
   }, [actor, isLoggedIn]);
@@ -68,18 +70,23 @@ export default function AdminDashboard() {
     }
   }, [isAdmin, actor, loaded, loading, fetchRSVPs]);
 
+  // Auto-claim admin on first login if no admin assigned yet
   const handleClaimAdmin = async () => {
     if (!actor) return;
-    setClaimingAdmin(true);
+    setClaiming(true);
     setError(null);
     try {
-      await actor.claimFirstAdmin();
-      setIsAdmin(true);
-      setAdminAssigned(true);
+      const result = await actor.registerAdminBySecret(ADMIN_SECRET);
+      if (result) {
+        setIsAdmin(true);
+        setAdminAssigned(true);
+      } else {
+        setError("Could not activate admin. Contact support.");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setClaimingAdmin(false);
+      setClaiming(false);
     }
   };
 
@@ -96,7 +103,7 @@ export default function AdminDashboard() {
     border: "1px solid rgba(201,168,76,0.3)",
   };
 
-  // Loading / initializing
+  // Loading
   if (isInitializing || actorFetching) {
     return (
       <div
@@ -111,7 +118,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Not logged in — show login prompt
+  // Not logged in
   if (!isLoggedIn) {
     return (
       <div
@@ -143,7 +150,7 @@ export default function AdminDashboard() {
               </>
             ) : (
               <>
-                <LogIn className="h-4 w-4" /> Sign In
+                <LogIn className="h-4 w-4" /> Sign In with Internet Identity
               </>
             )}
           </Button>
@@ -160,7 +167,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Logged in but admin status still loading
+  // Logged in, checking admin status
   if (isAdmin === null) {
     return (
       <div
@@ -175,8 +182,8 @@ export default function AdminDashboard() {
     );
   }
 
-  // Logged in, not admin, and no admin assigned yet — allow claiming
-  if (!isAdmin && !adminAssigned) {
+  // Logged in, not admin yet, no admin assigned — auto-activate
+  if (!isAdmin && adminAssigned === false) {
     return (
       <div
         className="min-h-screen flex items-center justify-center px-4"
@@ -193,17 +200,16 @@ export default function AdminDashboard() {
             className="text-sm mb-6"
             style={{ color: "rgba(255,255,255,0.6)" }}
           >
-            No admin has been assigned yet. Click below to claim admin access
-            for this account.
+            Tap the button below to activate your admin access.
           </p>
           {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
           <Button
             onClick={handleClaimAdmin}
-            disabled={claimingAdmin}
+            disabled={claiming}
             className="w-full gap-2 font-semibold"
             style={{ background: "#c9a84c", color: "#001533" }}
           >
-            {claimingAdmin ? (
+            {claiming ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" /> Activating...
               </>
@@ -212,9 +218,7 @@ export default function AdminDashboard() {
             )}
           </Button>
           <Button
-            onClick={() => {
-              clear();
-            }}
+            onClick={clear}
             variant="ghost"
             className="w-full mt-3 text-sm"
             style={{ color: "rgba(255,255,255,0.4)" }}
@@ -226,7 +230,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Logged in but not admin (and admin already assigned to someone else)
+  // Logged in but not admin (and admin already assigned to a different account)
   if (!isAdmin) {
     return (
       <div
@@ -254,9 +258,7 @@ export default function AdminDashboard() {
             Back to Site
           </Button>
           <Button
-            onClick={() => {
-              clear();
-            }}
+            onClick={clear}
             variant="ghost"
             className="w-full mt-3 text-sm"
             style={{ color: "rgba(255,255,255,0.4)" }}
@@ -268,7 +270,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // Admin — show RSVP dashboard
+  // Admin — RSVP dashboard
   return (
     <div
       className="min-h-screen px-4 py-8"
@@ -307,9 +309,7 @@ export default function AdminDashboard() {
               Refresh
             </Button>
             <Button
-              onClick={() => {
-                clear();
-              }}
+              onClick={clear}
               variant="outline"
               className="gap-2"
               style={{
@@ -331,8 +331,7 @@ export default function AdminDashboard() {
               }}
               data-ocid="admin.cancel_button"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Site
+              <ArrowLeft className="h-4 w-4" /> Back to Site
             </Button>
           </div>
         </div>

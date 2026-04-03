@@ -65,6 +65,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     isAdminAssigned(): Promise<boolean>;
+    registerAdminBySecret(secret: string): Promise<boolean>;
     claimFirstAdmin(): Promise<void>;
     getAllRSVPEntriesWithPin(pin: string): Promise<Array<RSVPEntry>>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

@@ -159,6 +159,7 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     isAdminAssigned(): Promise<boolean>;
     claimFirstAdmin(): Promise<void>;
+    registerAdminBySecret(secret: string): Promise<boolean>;
     getAllRSVPEntriesWithPin(pin: string): Promise<Array<RSVPEntry>>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
@@ -472,6 +473,20 @@ export class Backend implements backendInterface {
             }
         } else {
             await (this.actor as any).claimFirstAdmin();
+        }
+    }
+    async registerAdminBySecret(secret: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await (this.actor as any).registerAdminBySecret(secret);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await (this.actor as any).registerAdminBySecret(secret);
+            return result;
         }
     }
     async getAllRSVPEntriesWithPin(pin: string): Promise<Array<RSVPEntry>> {

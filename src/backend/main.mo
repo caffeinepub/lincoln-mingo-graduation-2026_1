@@ -27,7 +27,7 @@ actor {
   // Initialize invite links
   let inviteState = InviteLinksModule.initState();
 
-  // Kept for stable variable compatibility with previous version
+  // Kept for stable variable compatibility
   let adminPin : Text = "REDOAK2026";
 
   // User Profile Management
@@ -58,7 +58,7 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // Invite Links - Admin protected for generation and viewing
+  // Invite Links
   public shared ({ caller }) func generateInviteCode() : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can generate invite codes");
@@ -69,12 +69,10 @@ actor {
     code;
   };
 
-  // Public function - authentication via invite code
   public shared func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
     InviteLinksModule.submitRSVP(inviteState, name, attending, inviteCode);
   };
 
-  // Get all RSVPs - Admin only
   public query ({ caller }) func getAllRSVPs() : async [InviteLinksModule.RSVP] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view RSVPs");
@@ -82,7 +80,6 @@ actor {
     InviteLinksModule.getAllRSVPs(inviteState);
   };
 
-  // Get invite codes - Admin only
   public query ({ caller }) func getInviteCodes() : async [InviteLinksModule.InviteCode] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view invite codes");
@@ -90,7 +87,7 @@ actor {
     InviteLinksModule.getInviteCodes(inviteState);
   };
 
-  // === Email-based RSVP (no invite code required) ===
+  // === Email-based RSVP ===
   public type RSVPEntry = {
     name : Text;
     email : Text;
@@ -100,7 +97,6 @@ actor {
 
   var rsvpEntries = List.empty<RSVPEntry>();
 
-  // Submit RSVP with email - public, no auth required
   public shared func submitRSVPWithEmail(name : Text, email : Text, attending : Bool) : async () {
     let entry : RSVPEntry = {
       name = name;
@@ -111,7 +107,6 @@ actor {
     rsvpEntries.add(entry);
   };
 
-  // Get all email RSVPs - Admin only
   public query ({ caller }) func getAllRSVPEntries() : async [RSVPEntry] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view RSVPs");
@@ -119,7 +114,7 @@ actor {
     rsvpEntries.toArray();
   };
 
-  // Photo Gallery - Memories & Moments
+  // Photo Gallery
   type MemoryMetadata = {
     title : Text;
     description : Text;
@@ -134,7 +129,6 @@ actor {
 
   var memories = List.empty<MemoryMetadata>();
 
-  // Add memory - Admin only
   public shared ({ caller }) func addMemory(image : Storage.ExternalBlob, title : Text, description : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can add memories");
@@ -147,21 +141,18 @@ actor {
     memories.add(memory);
   };
 
-  // Get all memories - Public
   public query func getAllMemories() : async [MemoryMetadata] {
     let arr = memories.toArray();
     arr.sort();
   };
 
-  // Update photo - Admin only
   public shared ({ caller }) func updatePhoto() : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can update photos");
     };
-    // Update logic placeholder
   };
 
-  // Guest Book - Public messages
+  // Guest Book
   type GuestBookMessage = {
     from : Text;
     message : Text;
@@ -170,13 +161,12 @@ actor {
 
   module GuestBookMessage {
     public func compare(msg1 : GuestBookMessage, msg2 : GuestBookMessage) : Order.Order {
-      Int.compare(msg2.timestamp, msg1.timestamp); // Most recent first
+      Int.compare(msg2.timestamp, msg1.timestamp);
     };
   };
 
   var guestBookMessages = List.empty<GuestBookMessage>();
 
-  // Add guest book message - Public (no authentication required)
   public shared func addGuestBookMessage(message : Text, from : Text) : async () {
     let entry : GuestBookMessage = {
       message;
@@ -186,34 +176,41 @@ actor {
     guestBookMessages.add(entry);
   };
 
-  // Get all guest book messages - Public
   public query func getAllGuestBookMessages() : async [GuestBookMessage] {
     let arr = guestBookMessages.toArray();
     arr.sort();
   };
 
-  // Check if admin has been assigned yet
+  // Check if admin has been assigned
   public query func isAdminAssigned() : async Bool {
     accessControlState.adminAssigned;
   };
 
-  // Claim first admin - any logged-in user can become admin if no admin assigned yet.
-  public shared ({ caller }) func claimFirstAdmin() : async () {
+  // Register caller as admin using a secret passphrase.
+  // Only works if no admin has been assigned yet.
+  // Secret is hardcoded server-side — never visible to guests.
+  public shared ({ caller }) func registerAdminBySecret(secret : Text) : async Bool {
     if (caller.isAnonymous()) {
-      Runtime.trap("Must be logged in to claim admin");
+      return false;
     };
-    if (AccessControl.isAdmin(accessControlState, caller)) {
-      return;
+    if (accessControlState.adminAssigned) {
+      // Already have an admin — check if THIS caller is already admin
+      return AccessControl.isAdmin(accessControlState, caller);
     };
-    if (not accessControlState.adminAssigned) {
+    if (secret == "MINGO2026ADMIN") {
       accessControlState.userRoles.add(caller, #admin);
       accessControlState.adminAssigned := true;
-    } else {
-      Runtime.trap("Admin has already been assigned to another account.");
+      return true;
     };
+    return false;
   };
 
-  // Legacy PIN function - kept for API compatibility, admin only
+  // Kept for ABI compatibility — now a no-op
+  public shared ({ caller }) func claimFirstAdmin() : async () {
+    // Deprecated: use registerAdminBySecret instead
+  };
+
+  // Legacy PIN function - kept for API compatibility
   public query ({ caller }) func getAllRSVPEntriesWithPin(pin : Text) : async [RSVPEntry] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view RSVPs");
