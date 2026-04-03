@@ -8,17 +8,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, LogIn, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { RSVPEntry } from "../backend.d";
 import { useActor } from "../hooks/useActor";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 export default function AdminDashboard() {
+  const { identity, login, clear, isInitializing, isLoggingIn } =
+    useInternetIdentity();
   const { actor, isFetching: actorFetching } = useActor();
   const [rsvps, setRsvps] = useState<RSVPEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [adminAssigned, setAdminAssigned] = useState<boolean | null>(null);
+  const [claimingAdmin, setClaimingAdmin] = useState(false);
+
+  const isLoggedIn = !!identity && !identity.getPrincipal().isAnonymous();
+
+  // Check admin status once actor is ready and user is logged in
+  useEffect(() => {
+    if (!actor || !isLoggedIn) return;
+    (async () => {
+      try {
+        const [adminStatus, assigned] = await Promise.all([
+          actor.isCallerAdmin(),
+          actor.isAdminAssigned(),
+        ]);
+        setIsAdmin(adminStatus);
+        setAdminAssigned(assigned);
+      } catch {
+        setIsAdmin(false);
+        setAdminAssigned(true);
+      }
+    })();
+  }, [actor, isLoggedIn]);
 
   const fetchRSVPs = useCallback(async () => {
     if (!actor) return;
@@ -35,12 +61,27 @@ export default function AdminDashboard() {
     }
   }, [actor]);
 
-  // Auto-load RSVPs as soon as actor is ready
+  // Auto-load RSVPs once confirmed admin
   useEffect(() => {
-    if (actor && !loaded && !loading) {
+    if (isAdmin && actor && !loaded && !loading) {
       fetchRSVPs();
     }
-  }, [actor, loaded, loading, fetchRSVPs]);
+  }, [isAdmin, actor, loaded, loading, fetchRSVPs]);
+
+  const handleClaimAdmin = async () => {
+    if (!actor) return;
+    setClaimingAdmin(true);
+    setError(null);
+    try {
+      await actor.claimFirstAdmin();
+      setIsAdmin(true);
+      setAdminAssigned(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setClaimingAdmin(false);
+    }
+  };
 
   const handleBackToSite = () => {
     window.location.hash = "";
@@ -50,7 +91,13 @@ export default function AdminDashboard() {
   const attending = rsvps.filter((r) => r.attending).length;
   const notAttending = rsvps.filter((r) => !r.attending).length;
 
-  if (actorFetching || (!loaded && loading)) {
+  const cardStyle = {
+    background: "#001f4d",
+    border: "1px solid rgba(201,168,76,0.3)",
+  };
+
+  // Loading / initializing
+  if (isInitializing || actorFetching) {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
@@ -64,7 +111,8 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!actor) {
+  // Not logged in — show login prompt
+  if (!isLoggedIn) {
     return (
       <div
         className="min-h-screen flex items-center justify-center px-4"
@@ -72,26 +120,155 @@ export default function AdminDashboard() {
       >
         <div
           className="w-full max-w-sm rounded-2xl p-8 text-center"
-          style={{
-            background: "#001f4d",
-            border: "1px solid rgba(201,168,76,0.3)",
-          }}
+          style={cardStyle}
         >
-          <p className="text-red-400 text-base mb-4">
-            Unable to connect. Please refresh the page.
+          <h1 className="text-2xl font-bold mb-2" style={{ color: "#c9a84c" }}>
+            Admin Login
+          </h1>
+          <p
+            className="text-sm mb-6"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
+            Sign in to view RSVP responses.
           </p>
           <Button
-            onClick={() => window.location.reload()}
-            className="w-full font-semibold"
+            onClick={login}
+            disabled={isLoggingIn}
+            className="w-full gap-2 font-semibold"
             style={{ background: "#c9a84c", color: "#001533" }}
           >
-            Refresh
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Signing in...
+              </>
+            ) : (
+              <>
+                <LogIn className="h-4 w-4" /> Sign In
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleBackToSite}
+            variant="ghost"
+            className="w-full mt-3 text-sm"
+            style={{ color: "rgba(255,255,255,0.4)" }}
+          >
+            ← Back to Site
           </Button>
         </div>
       </div>
     );
   }
 
+  // Logged in but admin status still loading
+  if (isAdmin === null) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "#001533" }}
+      >
+        <Loader2
+          className="h-10 w-10 animate-spin"
+          style={{ color: "#c9a84c" }}
+        />
+      </div>
+    );
+  }
+
+  // Logged in, not admin, and no admin assigned yet — allow claiming
+  if (!isAdmin && !adminAssigned) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-4"
+        style={{ background: "#001533" }}
+      >
+        <div
+          className="w-full max-w-sm rounded-2xl p-8 text-center"
+          style={cardStyle}
+        >
+          <h1 className="text-2xl font-bold mb-2" style={{ color: "#c9a84c" }}>
+            Activate Admin
+          </h1>
+          <p
+            className="text-sm mb-6"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
+            No admin has been assigned yet. Click below to claim admin access
+            for this account.
+          </p>
+          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          <Button
+            onClick={handleClaimAdmin}
+            disabled={claimingAdmin}
+            className="w-full gap-2 font-semibold"
+            style={{ background: "#c9a84c", color: "#001533" }}
+          >
+            {claimingAdmin ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Activating...
+              </>
+            ) : (
+              "Activate Admin Access"
+            )}
+          </Button>
+          <Button
+            onClick={() => {
+              clear();
+            }}
+            variant="ghost"
+            className="w-full mt-3 text-sm"
+            style={{ color: "rgba(255,255,255,0.4)" }}
+          >
+            Sign Out
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged in but not admin (and admin already assigned to someone else)
+  if (!isAdmin) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-4"
+        style={{ background: "#001533" }}
+      >
+        <div
+          className="w-full max-w-sm rounded-2xl p-8 text-center"
+          style={cardStyle}
+        >
+          <h1 className="text-2xl font-bold mb-2" style={{ color: "#c9a84c" }}>
+            Access Denied
+          </h1>
+          <p
+            className="text-sm mb-6"
+            style={{ color: "rgba(255,255,255,0.6)" }}
+          >
+            This account does not have admin access.
+          </p>
+          <Button
+            onClick={handleBackToSite}
+            className="w-full font-semibold"
+            style={{ background: "#c9a84c", color: "#001533" }}
+          >
+            Back to Site
+          </Button>
+          <Button
+            onClick={() => {
+              clear();
+            }}
+            variant="ghost"
+            className="w-full mt-3 text-sm"
+            style={{ color: "rgba(255,255,255,0.4)" }}
+          >
+            Sign Out
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin — show RSVP dashboard
   return (
     <div
       className="min-h-screen px-4 py-8"
@@ -128,6 +305,20 @@ export default function AdminDashboard() {
                 className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
               />
               Refresh
+            </Button>
+            <Button
+              onClick={() => {
+                clear();
+              }}
+              variant="outline"
+              className="gap-2"
+              style={{
+                borderColor: "rgba(255,255,255,0.3)",
+                color: "rgba(255,255,255,0.7)",
+                background: "transparent",
+              }}
+            >
+              Sign Out
             </Button>
             <Button
               onClick={handleBackToSite}

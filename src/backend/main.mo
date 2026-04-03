@@ -111,8 +111,11 @@ actor {
     rsvpEntries.add(entry);
   };
 
-  // Get all email RSVPs - Public (no auth required)
-  public query func getAllRSVPEntries() : async [RSVPEntry] {
+  // Get all email RSVPs - Admin only
+  public query ({ caller }) func getAllRSVPEntries() : async [RSVPEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view RSVPs");
+    };
     rsvpEntries.toArray();
   };
 
@@ -210,8 +213,11 @@ actor {
     };
   };
 
-  // Legacy PIN function - no longer requires PIN, kept for API compatibility
-  public query func getAllRSVPEntriesWithPin(pin : Text) : async [RSVPEntry] {
+  // Legacy PIN function - kept for API compatibility, admin only
+  public query ({ caller }) func getAllRSVPEntriesWithPin(pin : Text) : async [RSVPEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view RSVPs");
+    };
     rsvpEntries.toArray();
   };
 };

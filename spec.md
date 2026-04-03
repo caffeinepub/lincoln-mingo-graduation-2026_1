@@ -1,24 +1,23 @@
 # Lincoln Mingo Graduation 2026
 
 ## Current State
-RSVP form collects name, email, and attendance choice. It passes email as `inviteCode` to `submitRSVP`, which fails because the backend validates invite codes. The Yes/No attendance buttons are left-aligned.
+The admin dashboard (`AdminDashboard.tsx`) loads RSVPs immediately for anyone who navigates to `#admin` — no login, no restriction. The backend `getAllRSVPEntries` is a public query with no auth check. The authorization component (access control) is already installed and the `claimFirstAdmin` / `isAdminAssigned` / `isCallerAdmin` backend functions exist.
 
 ## Requested Changes (Diff)
 
 ### Add
-- New backend function `submitRSVPWithEmail(name, email, attending)` that stores RSVP with email, no invite code required
-- RSVP type updated to include email field
+- Google login flow on the admin page: user must sign in with Google before seeing RSVPs
+- After login, check `isCallerAdmin()` — if true, show RSVP dashboard directly
+- If not admin and admin not yet assigned, show "Claim Admin Access" button that calls `claimFirstAdmin()`
+- If not admin and admin already assigned, show "Access Denied" message
 
 ### Modify
-- Frontend RSVP form calls the new `submitRSVPWithEmail` instead of passing email as invite code
-- Yes/No attendance buttons centered (justify-center on container)
-- useQueries hook updated to call new backend function
+- `AdminDashboard.tsx`: add login gate using the authorization/Google login hook before showing RSVP data
+- Backend `getAllRSVPEntries`: make it admin-only (add caller auth check)
 
 ### Remove
-- Dependency on invite code for RSVP submission
+- Open access to RSVP data without login
 
 ## Implementation Plan
-1. Update `main.mo` to add `submitRSVPWithEmail` and update RSVP type
-2. Regenerate backend bindings
-3. Update `RSVPMessages.tsx` to center buttons and call new function
-4. Update `useQueries.ts` hook
+1. Update `AdminDashboard.tsx` to use Google login (useAuth/useActor with identity), check admin status, and conditionally show login prompt, claim button, access denied, or RSVP table
+2. Update `main.mo` `getAllRSVPEntries` to require admin role
